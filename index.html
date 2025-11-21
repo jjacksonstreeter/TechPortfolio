@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Joey – Tech Portfolio Notebook</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    /* ---- Base Reset ---- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #222 0, #050505 45%, #000 100%);
+      color: #111;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ---- Notebook Container ---- */
+    .notebook {
+      position: relative;
+      width: min(960px, 100%);
+      background-color: #f7f7f7;
+      /* ruled paper effect (subtle gray lines) */
+      background-image: linear-gradient(#e5e5e5 1px, transparent 1px);
+      background-size: 100% 32px;
+      border-radius: 18px;
+      padding: 2.5rem 2.75rem 3rem 4.5rem;
+      box-shadow:
+        0 28px 70px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(24, 24, 27, 0.75);
+      border: 1px solid rgba(163, 163, 163, 0.9);
+      overflow: hidden;
+    }
+
+    /* left margin line */
+    .notebook::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 3.4rem;
+      width: 1px;
+      background: #b0b0b0;
+      opacity: 0.85;
+    }
+
+    /* spiral binding */
+    .spiral {
+      position: absolute;
+      top: 1.4rem;
+      bottom: 1.4rem;
+      left: 1rem;
+      width: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .spiral-hole {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid #050505;
+      background: radial-gradient(circle at 30% 30%, #ffffff 0, #b3b3b3 60%, #111 100%);
+      box-shadow:
+        0 1px 2px rgba(15, 15, 15, 0.7),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.9);
+    }
+
+    @media (max-height: 780px) {
+      .spiral {
+        top: 1.1rem;
+        bottom: 1.1rem;
+      }
+    }
+
+    /* ---- Top Tabs / Navigation ---- */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      margin-left: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 0.25rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(15, 15, 15, 0.03);
+      border: 1px solid rgba(163, 163, 163, 0.9);
+      color: #111;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .tab::before {
+      content: "●";
+      font-size: 0.5rem;
+      opacity: 0.7;
+    }
+
+    .tab:hover {
+      transform: translateY(-1px);
+      background: rgba(20, 20, 20, 0.08);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    }
+
+    .tab.active {
+      background: #111;
+      color: #f9f9f9;
+      border-color: #111;
+    }
+
+    /* ---- Header ---- */
+    header {
+      margin-bottom: 2rem;
+    }
+
+    .headline {
+      font-size: clamp(1.9rem, 3vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #050505;
+      margin-bottom: 0.5rem;
+    }
+
+    .subheadline {
+      font-size: 0.95rem;
+      color: #424242;
+      max-width: 38rem;
+      line-height: 1.6;
+    }
+
+    .tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #7a7a7a;
+      margin-bottom: 0.75rem;
+    }
+
+    .tagline span {
+      width: 34px;
+      height: 1px;
+      background: #a3a3a3;
+    }
+
+    /* ---- Layout ---- */
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 800px) {
+      .notebook {
+        padding: 2rem 1.5rem 2.5rem 3.2rem;
+      }
+
+      .notebook::before {
+        left: 2.4rem;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1.25rem 0.5rem;
+      }
+
+      .notebook {
+        padding: 1.75rem 1.2rem 2.2rem 2.7rem;
+        border-radius: 14px;
+      }
+
+      .tabs {
+        margin-left: 0;
+      }
+    }
+
+    /* ---- Sections ---- */
+    section {
+      margin-bottom: 1.75rem;
+    }
+
+    section:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: #b0b0b0;
+      margin-bottom: 0.35rem;
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #111;
+    }
+
+    p,
+    li {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #3a3a3a;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .pill {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px dashed rgba(163, 163, 163, 0.95);
+      background: rgba(252, 252, 252, 0.96);
+    }
+
+    /* ---- Projects ---- */
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .project-card {
+      padding: 0.75rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid rgba(156, 163, 175, 0.85);
+      background: rgba(248, 248, 248, 0.98);
+      box-shadow: 0 1px 0 rgba(156, 163, 175, 0.45);
+    }
+
+    .project-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .project-name {
+      font-weight: 600;
+      font-size: 0.93rem;
+      color: #111;
+    }
+
+    .project-meta {
+      font-size: 0.75rem;
+      color: #6b6b6b;
+      white-space: nowrap;
+    }
+
+    .project-links {
+      margin-top: 0.35rem;
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.78rem;
+    }
+
+    .project-links a {
+      border-bottom: 1px dashed rgba(55, 55, 55, 0.9);
+    }
+
+    .project-links a:hover {
+      border-bottom-style: solid;
+    }
+
+    /* ---- Sidebar ---- */
+    .card {
+      padding: 0.85rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid rgba(163, 163, 163, 0.95);
+      background: rgba(249, 249, 249, 0.98);
+      margin-bottom: 0.9rem;
+    }
+
+    .card:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .contact-list {
+      list-style: none;
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+    }
+
+    .contact-list span {
+      font-weight: 600;
+      color: #111;
+    }
+
+    .timeline {
+      list-style: none;
+      border-left: 1px solid rgba(209, 213, 219, 0.95);
+      margin-left: 0.2rem;
+      padding-left: 0.9rem;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .timeline-item {
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -0.97rem;
+      top: 0.22rem;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #111;
+      box-shadow: 0 0 0 2px #d4d4d4;
+    }
+
+    .timeline-role {
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .timeline-org {
+      font-size: 0.8rem;
+      color: #6b6b6b;
+    }
+
+    .timeline-date {
+      font-size: 0.75rem;
+      color: #9b9b9b;
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      margin-top: 1.8rem;
+      padding-top: 0.9rem;
+      border-top: 1px dashed rgba(163, 163, 163, 0.95);
+      font-size: 0.7rem;
+      color: #9b9b9b;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="notebook">
+    <!-- Spiral binding (purely visual) -->
+    <div class="spiral">
+      <div class="spiral-hole"></div>
+      <div class="spiral-hole"></div>
+      <div class="spiral-hole"></div>
+      <div class="spiral-hole"></div>
+      <div class="spiral-hole"></div>
+      <div class="spiral-hole"></div>
+    </div>
+
+    <!-- Tabs / Notebook sections -->
+    <nav class="tabs">
+      <a href="#about" class="tab active">About</a>
+      <a href="#projects" class="tab">Projects</a>
+      <a href="#skills" class="tab">Skills</a>
+      <a href="#experience" class="tab">Experience</a>
+      <a href="#contact" class="tab">Contact</a>
+    </nav>
+
+    <!-- Header -->
+    <header>
+      <div class="tagline">
+        <span></span>
+        TECH PORTFOLIO · NOTEBOOK
+      </div>
+      <h1 class="headline">Joey Jackson-Streeter</h1>
+      <p class="subheadline">
+        Emerging technologist and customer experience leader who turns complex problems
+        into simple, human-centered solutions. This notebook captures what I’m learning,
+        building, and shipping in tech.
+      </p>
+    </header>
+
+    <main class="grid">
+      <!-- Main column -->
+      <div>
+        <!-- ABOUT -->
+        <section id="about">
+          <div class="section-label">Page 01</div>
+          <h2 class="section-title">About Me</h2>
+          <p>
+            I bridge customer experience, technology, and storytelling. With 16+ years in
+            high-volume support roles and a growing toolkit in data, automation, and AI,
+            I’m focused on building solutions that actually feel good to use—for customers
+            and for the teams behind the scenes.
+          </p>
+          <p style="margin-top: 0.5rem;">
+            Right now I’m deepening my skills in web development, analytics dashboards,
+            and AI-powered workflows—shipping experiments, prototyping ideas, and treating
+            every project like a learning lab.
+          </p>
+        </section>
+
+        <!-- PROJECTS -->
+        <section id="projects">
+          <div class="section-label">Page 02</div>
+          <h2 class="section-title">Projects</h2>
+          <div class="project-list">
+            <!-- PROJECT 1 -->
+            <article class="project-card">
+              <div class="project-header">
+                <h3 class="project-name">Spotify-Style Analytics Dashboard</h3>
+                <span class="project-meta">Power BI · Data Storytelling</span>
+              </div>
+              <p>
+                Designed and built a streaming-style dashboard to explore music data,
+                with clear KPIs and interactive visuals tailored for non-technical stakeholders.
+              </p>
+              <div class="pill-row">
+                <span class="pill">Power BI</span>
+                <span class="pill">UX for Data</span>
+                <span class="pill">Dashboard Design</span>
+              </div>
+              <div class="project-links">
+                <a href="#" target="_blank">View Case Study</a>
+                <a href="#" target="_blank">GitHub / Files</a>
+              </div>
+            </article>
+
+            <!-- PROJECT 2 -->
+            <article class="project-card">
+              <div class="project-header">
+                <h3 class="project-name">IT Onboarding AI Agent</h3>
+                <span class="project-meta">Copilot Studio · Knowledge Base</span>
+              </div>
+              <p>
+                Prototyped an AI agent for new-hire IT onboarding, centralizing policies,
+                FAQs, and how-to guides into a conversational experience for faster ramp-up.
+              </p>
+              <div class="pill-row">
+                <span class="pill">Microsoft Copilot Studio</span>
+                <span class="pill">Process Design</span>
+                <span class="pill">Knowledge Management</span>
+              </div>
+              <div class="project-links">
+                <a href="#" target="_blank">Design Notes</a>
+              </div>
+            </article>
+
+            <!-- PROJECT 3 -->
+            <article class="project-card">
+              <div class="project-header">
+                <h3 class="project-name">Python Battle Game</h3>
+                <span class="project-meta">Python · Game Logic</span>
+              </div>
+              <p>
+                Built a text-based battle game to explore functions, randomness, and game
+                balance—using playful mechanics to make learning Python more engaging.
+              </p>
+              <div class="pill-row">
+                <span class="pill">Python</span>
+                <span class="pill">Game Design</span>
+                <span class="pill">Learning by Doing</span>
+              </div>
+              <div class="project-links">
+                <a href="#" target="_blank">Source Code</a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- SKILLS -->
+        <section id="skills">
+          <div class="section-label">Page 03</div>
+          <h2 class="section-title">Skills Snapshot</h2>
+
+          <p><strong>Tech & Tools</strong></p>
+          <div class="pill-row" style="margin-bottom: 0.6rem;">
+            <span class="pill">HTML · CSS · JavaScript (Foundations)</span>
+            <span class="pill">Python</span>
+            <span class="pill">Power BI</span>
+            <span class="pill">Microsoft 365</span>
+            <span class="pill">SharePoint</span>
+          </div>
+
+          <p><strong>Strengths</strong></p>
+          <div class="pill-row">
+            <span class="pill">Customer Experience Strategy</span>
+            <span class="pill">Systems Thinking</span>
+            <span class="pill">Facilitation & Collaboration</span>
+            <span class="pill">Problem-Solving</span>
+            <span class="pill">Leadership & Coaching</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Sidebar column -->
+      <aside>
+        <!-- EXPERIENCE -->
+        <section id="experience" class="card">
+          <div class="section-label">Page 04</div>
+          <h2 class="section-title">Experience Notes</h2>
+          <ul class="timeline">
+            <li class="timeline-item">
+              <div class="timeline-role">Home Energy Solutions Specialist</div>
+              <div class="timeline-org">Generac · Hybrid</div>
+              <div class="timeline-date">Jan 2025 – Sep 2025</div>
+            </li>
+            <li class="timeline-item">
+              <div class="timeline-role">Customer Experience Specialist</div>
+              <div class="timeline-org">Multiple Industries</div>
+              <div class="timeline-date">16+ Years</div>
+            </li>
+            <li class="timeline-item">
+              <div class="timeline-role">i.c.stars |* Milwaukee</div>
+              <div class="timeline-org">Emerging Technologist & Leader</div>
+              <div class="timeline-date">Ongoing</div>
+            </li>
+          </ul>
+        </section>
+
+        <!-- CONTACT -->
+        <section id="contact" class="card">
+          <div class="section-label">Page 05</div>
+          <h2 class="section-title">Contact & Links</h2>
+          <ul class="contact-list">
+            <li>
+              <span>Email:</span><br />
+              <a href="mailto:youremail@example.com">youremail@example.com</a>
+            </li>
+            <li>
+              <span>LinkedIn:</span><br />
+              <href="https://www.linkedin.com/in/your-handle" target="_blank">
+                linkedin.com/in/your-handle
+              </a>
+            </li>
+            <li>
+              <span>GitHub:</span><br />
+              <href="https://github.com/your-handle" target="_blank">
+                github.com/your-handle
+              </a>
+            </li>
+            <li>
+              <span>Location:</span><br />
+              Milwaukee, WI · Open to remote
+            </li>
+          </ul>
+        </section>
+
+        <!-- QUICK NOTES -->
+        <section class="card">
+          <div class="section-label">Margin Notes</div>
+          <h2 class="section-title">What I’m Exploring Next</h2>
+          <ul style="list-style: disc; padding-left: 1rem; margin-top: 0.4rem;">
+            <li>Deeper front-end skills (component-based UIs)</li>
+            <li>Automation + AI tooling for support teams</li>
+            <li>Data storytelling anyone can understand</li>
+          </ul>
+        </section>
+      </aside>
+    </main>
+
+    <footer>
+      <span>Last updated: 2025</span>
+      <span>“Always in beta.”</span>
+    </footer>
+  </div>
+
+  <!-- Optional: smooth scroll for in-page links -->
+  <script>
+    document.querySelectorAll('.tabs a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const id = link.getAttribute('href');
+        const target = document.querySelector(id);
+        if (target) {
+          window.scrollTo({
+            top: target.getBoundingClientRect().top + window.scrollY - 40,
+            behavior: 'smooth'
+          });
+        }
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
